@@ -1,0 +1,18 @@
+{
+  "api": {
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "api_key": "你的API Key",
+    "model": "qwen3.5-plus",
+    "max_tokens": 8192,
+    "temperature": 0.7
+  },
+  "screen": {
+    "capture_quality": 0.95,
+    "compression_level": 6
+  },
+  "agent": {
+    "max_iterations": 20,
+    "delay_between_actions": 1.0,
+    "confidence_threshold": 0.7
+  }
+}
