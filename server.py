@@ -64,7 +64,7 @@ async def app_lifespan(server: FastMCP):
     }
 
 
-mcp = FastMCP("autogui", lifespan=app_lifespan)
+mcp = FastMCP("AutoGUI", lifespan=app_lifespan)
 
 
 # --- Helper ---
