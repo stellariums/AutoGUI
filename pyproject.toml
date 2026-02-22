@@ -23,3 +23,6 @@ Homepage = "https://github.com/stellariums/AutoGUI"
 
 [project.scripts]
 autogui-mcp = "server:mcp.run"
+
+[tool.setuptools]
+py-modules = ["server", "agent"]
