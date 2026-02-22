@@ -13,37 +13,37 @@ from agent import ScreenAgent, Action
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """你是一个电脑操作助手。你的任务是根据用户的指令，通过一系列操作来完成用户的任务。
+SYSTEM_PROMPT = """You are a computer operation assistant. Your task is to complete the user's task through a series of screen operations.
 
-每次响应必须返回一个 JSON 对象，格式如下：
+Each response must return a JSON object in the following format:
 {
-    "thought": "你的思考过程，分析当前屏幕状态和下一步该做什么",
-    "action": "动作类型",
+    "thought": "Your reasoning process, analyzing the current screen state and what to do next",
+    "action": "action type",
     "parameters": {
-        "参数1": "值1"
+        "param1": "value1"
     },
     "dangerous": false
 }
 
-可用的动作类型：
-- click: 点击，参数：x, y (0-1000 的归一化坐标)
-- double_click: 双击，参数：x, y
-- right_click: 右键点击，参数：x, y
-- type: 输入文本，参数：text
-- press: 按键，参数：keys (按键数组，如 ["ctrl", "c"])
-- scroll: 滚动，参数：amount, x, y (可选)
-- drag: 拖拽，参数：start_x, start_y, end_x, end_y, duration (可选)
-- move: 移动鼠标，参数：x, y, duration (可选)
-- wait: 等待，参数：seconds
-- task_complete: 任务完成，参数：result (任务结果描述)
+Available action types:
+- click: Click, params: x, y (normalized coordinates 0-1000)
+- double_click: Double click, params: x, y
+- right_click: Right click, params: x, y
+- type: Input text, params: text
+- press: Key press, params: keys (key array, e.g. ["ctrl", "c"])
+- scroll: Scroll, params: amount, x, y (optional)
+- drag: Drag, params: start_x, start_y, end_x, end_y, duration (optional)
+- move: Move cursor, params: x, y, duration (optional)
+- wait: Wait, params: seconds
+- task_complete: Task done, params: result (description of task result)
 
-注意：
-1. 坐标系统使用 1000x1000 的归一化坐标，(0,0) 是左上角，(1000,1000) 是右下角
-2. 每次只执行一个动作
-3. 仔细观察屏幕内容，做出合理的决策
-4. 如果任务完成，使用 task_complete 动作
-5. 如果遇到困难，尝试不同的方法
-6. "dangerous" 字段：如果该操作可能造成不可逆后果（删除文件、关闭程序、系统操作等），设为 true
+Notes:
+1. Coordinate system uses 1000x1000 normalized coordinates, (0,0) is top-left, (1000,1000) is bottom-right
+2. Execute only one action at a time
+3. Carefully observe the screen content and make reasonable decisions
+4. When the task is complete, use the task_complete action
+5. If you encounter difficulties, try different approaches
+6. "dangerous" field: set to true if the action may cause irreversible consequences (deleting files, closing programs, system operations, etc.)
 """
 
 
@@ -145,7 +145,7 @@ async def autogui_execute_task(task: str, ctx: Context) -> list[TextContent | Im
             user_msg = {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": f"当前任务：{task}\n请分析屏幕并决定下一步操作。"},
+                    {"type": "text", "text": f"Current task: {task}\nAnalyze the screen and decide the next action."},
                     {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{screenshot_b64}"}},
                 ],
             }
@@ -187,19 +187,19 @@ async def autogui_execute_task(task: str, ctx: Context) -> list[TextContent | Im
                     else:
                         if agent.fallback_action == "block":
                             ctx.warning(f"Dangerous action blocked: {desc}")
-                            history.append({"role": "user", "content": [{"type": "text", "text": "该操作被用户阻止，请尝试其他方法。"}]})
+                            history.append({"role": "user", "content": [{"type": "text", "text": "This action was blocked by the user. Please try another approach."}]})
                             continue
                 except Exception:
                     # elicit not supported
                     if agent.fallback_action == "block":
                         ctx.warning(f"Dangerous action blocked (no elicit): {desc}")
-                        history.append({"role": "user", "content": [{"type": "text", "text": "该操作被安全策略阻止，请尝试其他方法。"}]})
+                        history.append({"role": "user", "content": [{"type": "text", "text": "This action was blocked by safety policy. Please try another approach."}]})
                         continue
 
             # Region bounds check
             if not agent.check_region_bounds(action):
                 ctx.warning("Action out of allowed region, skipping")
-                history.append({"role": "user", "content": [{"type": "text", "text": "操作坐标超出允许区域，请调整。"}]})
+                history.append({"role": "user", "content": [{"type": "text", "text": "Action coordinates are out of the allowed region. Please adjust."}]})
                 continue
 
             # Execute
