@@ -2,6 +2,8 @@
 
 # AutoGUI
 
+[![PyPI](https://img.shields.io/pypi/v/autogui-mcp)](https://pypi.org/project/autogui-mcp/) [![Python](https://img.shields.io/pypi/pyversions/autogui-mcp)](https://pypi.org/project/autogui-mcp/) [![License](https://img.shields.io/pypi/l/autogui-mcp)](https://github.com/stellariums/AutoGUI/blob/master/LICENSE)
+
 AI-driven screen automation MCP Server. Send natural language tasks, and the internal AI captures screenshots, analyzes them, and performs mouse/keyboard actions autonomously.
 
 ## Architecture
