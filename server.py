@@ -1,4 +1,5 @@
 import json
+import os
 import asyncio
 import logging
 from pathlib import Path
@@ -46,14 +47,43 @@ SYSTEM_PROMPT = """你是一个电脑操作助手。你的任务是根据用户�
 """
 
 
+DEFAULT_CONFIG = {
+    "api": {"base_url": "https://api.openai.com/v1", "api_key": "", "model": "gpt-4o", "max_tokens": 8192, "temperature": 0.7},
+    "screen": {"capture_quality": 0.95, "compression_level": 6, "max_width": 1280, "max_height": 720, "allowed_region": None},
+    "agent": {"max_iterations": 20, "delay_between_actions": 1.0, "confidence_threshold": 0.7, "max_history_rounds": 10},
+    "safety": {"enable_confirmation": True, "fallback_action": "block", "dangerous_keys": ["delete", "backspace", "escape"], "dangerous_hotkeys": [["ctrl", "w"], ["alt", "f4"], ["ctrl", "shift", "delete"]], "dangerous_patterns": ["rm ", "del ", "format ", "shutdown", "reboot"]},
+}
+
+
+def load_config() -> dict:
+    config = json.loads(json.dumps(DEFAULT_CONFIG))  # deep copy
+    config_path = Path(__file__).parent / "config.json"
+    if config_path.exists():
+        with open(config_path, "r", encoding="utf-8") as f:
+            file_cfg = json.load(f)
+        for section, values in file_cfg.items():
+            if section in config and isinstance(values, dict):
+                config[section].update(values)
+            else:
+                config[section] = values
+    # Env vars override (highest priority)
+    if v := os.environ.get("AUTOGUI_API_KEY"):
+        config["api"]["api_key"] = v
+    if v := os.environ.get("AUTOGUI_BASE_URL"):
+        config["api"]["base_url"] = v
+    if v := os.environ.get("AUTOGUI_MODEL"):
+        config["api"]["model"] = v
+    return config
+
+
 # --- Lifespan ---
 
 @asynccontextmanager
 async def app_lifespan(server: FastMCP):
-    config_path = Path(__file__).parent / "config.json"
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = json.load(f)
+    config = load_config()
     api_cfg = config["api"]
+    if not api_cfg["api_key"]:
+        raise ValueError("API key required. Set AUTOGUI_API_KEY env var or api.api_key in config.json")
     client = AsyncOpenAI(base_url=api_cfg["base_url"], api_key=api_cfg["api_key"])
     agent = ScreenAgent(config)
     yield {

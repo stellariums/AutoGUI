@@ -7,7 +7,7 @@ AI-driven screen automation MCP Server. Send natural language tasks, and the int
 ## Architecture
 
 ```
-MCP Client (Claude Code, etc.)
+MCP Client (Claude Code, Claude Desktop, Cursor, etc.)
     |  stdio
     v
 server.py (FastMCP async orchestration loop)
@@ -16,29 +16,53 @@ server.py (FastMCP async orchestration loop)
 agent.py (ScreenAgent toolkit: capture, execute, parse, safety)
 ```
 
-## Installation
+## Quick Start
 
 ```bash
+git clone https://github.com/stellariums/AutoGUI.git
+cd AutoGUI
 pip install -r requirements.txt
 ```
 
 ## Configuration
 
-Copy `config.json.example` to `config.json` and fill in your API key:
+AutoGUI supports layered configuration: **environment variables** (highest priority) > **config.json** > **defaults**.
+
+### Option A: Environment Variables Only (Simplest)
+
+Only 3 variables needed to get started:
+
+```bash
+set AUTOGUI_API_KEY=your-api-key
+set AUTOGUI_BASE_URL=https://api.openai.com/v1
+set AUTOGUI_MODEL=gpt-4o
+```
+
+Or copy `.env.example` to `.env` and pass via your MCP client config (see below).
+
+### Option B: Config File
 
 ```bash
 cp config.json.example config.json
 ```
+
+Edit `config.json` — only the `api` section is required, everything else has sensible defaults:
 
 ```json
 {
   "api": {
     "base_url": "https://your-api-endpoint/v1",
     "api_key": "your-api-key",
-    "model": "your-model-name",
-    "max_tokens": 8192,
-    "temperature": 0.7
-  },
+    "model": "your-model-name"
+  }
+}
+```
+
+<details>
+<summary>Advanced config options</summary>
+
+```json
+{
   "screen": {
     "max_width": 1280,
     "max_height": 720,
@@ -59,28 +83,75 @@ cp config.json.example config.json
 }
 ```
 
-## Usage
+</details>
 
-### As MCP Server (Recommended)
+## MCP Client Setup
 
-Add to your Claude Code MCP config (`.mcp.json`):
+### Claude Code
+
+```bash
+claude mcp add AutoGUI -- python /path/to/AutoGUI/server.py
+```
+
+Or add to `.mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "AutoGUI": {
       "command": "python",
-      "args": ["/path/to/AutoGUI/server.py"]
+      "args": ["/path/to/AutoGUI/server.py"],
+      "env": {
+        "AUTOGUI_API_KEY": "your-api-key",
+        "AUTOGUI_BASE_URL": "https://api.openai.com/v1",
+        "AUTOGUI_MODEL": "gpt-4o"
+      }
     }
   }
 }
 ```
 
-Then ask Claude Code to perform screen tasks:
+### Claude Desktop
 
-> "Use AutoGUI to open Notepad and type Hello World"
+Add to `claude_desktop_config.json`:
 
-### With MCP Inspector
+```json
+{
+  "mcpServers": {
+    "AutoGUI": {
+      "command": "python",
+      "args": ["C:/path/to/AutoGUI/server.py"],
+      "env": {
+        "AUTOGUI_API_KEY": "your-api-key",
+        "AUTOGUI_BASE_URL": "https://api.openai.com/v1",
+        "AUTOGUI_MODEL": "gpt-4o"
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+Add to Cursor MCP settings (`.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "AutoGUI": {
+      "command": "python",
+      "args": ["/path/to/AutoGUI/server.py"],
+      "env": {
+        "AUTOGUI_API_KEY": "your-api-key",
+        "AUTOGUI_BASE_URL": "https://api.openai.com/v1",
+        "AUTOGUI_MODEL": "gpt-4o"
+      }
+    }
+  }
+}
+```
+
+### MCP Inspector (Testing)
 
 ```bash
 npx @modelcontextprotocol/inspector python server.py
@@ -114,6 +185,26 @@ npx @modelcontextprotocol/inspector python server.py
 - Optional region restriction (`allowed_region`)
 - Elicit-based confirmation for dangerous operations
 - Configurable fallback: `block` or `allow`
+
+## FAQ
+
+**Q: Screenshot is black or empty**
+A: Make sure the screen is not locked. On Windows, pyautogui/mss cannot capture the lock screen.
+
+**Q: Chinese input not working**
+A: AutoGUI uses clipboard (`pyperclip` + `Ctrl+V`) for text input, which supports CJK characters. Make sure `pyperclip` is installed.
+
+**Q: "API key required" error**
+A: Set `AUTOGUI_API_KEY` env var or add `api.api_key` in `config.json`.
+
+**Q: "Another task is already running" error**
+A: AutoGUI processes one task at a time. Wait for the current task to finish.
+
+## Requirements
+
+- Windows 10/11
+- Python >= 3.10
+- An OpenAI-compatible vision API (GPT-4o, Qwen-VL, etc.)
 
 ## License
 

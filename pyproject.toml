@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autogui-mcp"
+version = "0.1.0"
+description = "AI-driven screen automation MCP Server"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0.0",
+    "mss>=9.0.1",
+    "pyautogui>=0.9.54",
+    "Pillow>=10.0.0",
+    "mcp>=1.0.0",
+    "pyperclip>=1.8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/stellariums/AutoGUI"
+
+[project.scripts]
+autogui-mcp = "server:mcp.run"

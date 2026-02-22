@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
 config.json
+.env
 .claude/
 .mcp.json
