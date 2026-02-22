@@ -1,57 +1,120 @@
-# Computer Control Agent
+[中文](README_CN.md) | English
 
-基于视觉的电脑操作 Agent，使用 AI 模型分析屏幕并执行操作。
+# AutoGUI
 
-## 功能特点
+AI-driven screen automation MCP Server. Send natural language tasks, and the internal AI captures screenshots, analyzes them, and performs mouse/keyboard actions autonomously.
 
-- 🖥️ 实时屏幕截图分析
-- 🤖 AI 驱动的任务规划和决策
-- 🎯 自动坐标映射 (1000x1000 → 实际分辨率)
-- ⌨️ 支持多种操作：点击、输入、快捷键、拖拽等
-- 🔄 自动循环执行直到任务完成
+## Architecture
 
-## 安装
+```
+MCP Client (Claude Code, etc.)
+    |  stdio
+    v
+server.py (FastMCP async orchestration loop)
+    |
+    v
+agent.py (ScreenAgent toolkit: capture, execute, parse, safety)
+```
+
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 配置
+## Configuration
 
-编辑 `config.json` 文件：
+Copy `config.json.example` to `config.json` and fill in your API key:
+
+```bash
+cp config.json.example config.json
+```
 
 ```json
 {
   "api": {
-    "base_url": "https://api.openai.com/v1",
-    "api_key": "your-api-key-here",
-    "model": "gpt-4o"
+    "base_url": "https://your-api-endpoint/v1",
+    "api_key": "your-api-key",
+    "model": "your-model-name",
+    "max_tokens": 8192,
+    "temperature": 0.7
+  },
+  "screen": {
+    "max_width": 1280,
+    "max_height": 720,
+    "allowed_region": null
+  },
+  "agent": {
+    "max_iterations": 20,
+    "delay_between_actions": 1.0,
+    "max_history_rounds": 10
+  },
+  "safety": {
+    "enable_confirmation": true,
+    "fallback_action": "block",
+    "dangerous_keys": ["delete", "backspace", "escape"],
+    "dangerous_hotkeys": [["ctrl", "w"], ["alt", "f4"]],
+    "dangerous_patterns": ["rm ", "del ", "format ", "shutdown"]
   }
 }
 ```
 
-## 使用
+## Usage
 
-```bash
-python agent.py
+### As MCP Server (Recommended)
+
+Add to your Claude Code MCP config (`.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "AutoGUI": {
+      "command": "python",
+      "args": ["/path/to/AutoGUI/server.py"]
+    }
+  }
+}
 ```
 
-然后输入你的任务，例如：
-- "打开记事本并输入'Hello World'"
-- "搜索桌面上的 Chrome 图标并打开它"
-- "最小化所有窗口"
+Then ask Claude Code to perform screen tasks:
 
-## 支持的操作
+> "Use AutoGUI to open Notepad and type Hello World"
 
-| 操作 | 说明 |
-|------|------|
-| click | 点击指定位置 |
-| double_click | 双击 |
-| right_click | 右键点击 |
-| type | 输入文本 |
-| press | 按键组合 |
-| scroll | 滚动 |
-| drag | 拖拽 |
-| move | 移动鼠标 |
-| wait | 等待 |
-| task_complete | 标记任务完成 |
+### With MCP Inspector
+
+```bash
+npx @modelcontextprotocol/inspector python server.py
+```
+
+## Tool
+
+| Tool | Description |
+|------|-------------|
+| `autogui_execute_task` | Execute a screen automation task via natural language |
+
+## Supported Actions
+
+| Action | Description |
+|--------|-------------|
+| click | Click at position |
+| double_click | Double click |
+| right_click | Right click |
+| type | Input text (supports CJK via clipboard) |
+| press | Key combination |
+| scroll | Scroll |
+| drag | Drag |
+| move | Move cursor |
+| wait | Wait |
+| task_complete | Mark task as done |
+
+## Safety
+
+- Dangerous action detection (rule-based + AI self-labeling)
+- Configurable dangerous keys, hotkeys, and text patterns
+- Optional region restriction (`allowed_region`)
+- Elicit-based confirmation for dangerous operations
+- Configurable fallback: `block` or `allow`
+
+## License
+
+MIT
