@@ -1,4 +1,4 @@
-中文 | [English](README.md)
+中文 | [English](https://github.com/stellariums/AutoGUI/blob/master/README.md)
 
 # AutoGUI
 
