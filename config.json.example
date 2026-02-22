@@ -8,11 +8,22 @@
   },
   "screen": {
     "capture_quality": 0.95,
-    "compression_level": 6
+    "compression_level": 6,
+    "max_width": 1280,
+    "max_height": 720,
+    "allowed_region": null
   },
   "agent": {
     "max_iterations": 20,
     "delay_between_actions": 1.0,
-    "confidence_threshold": 0.7
+    "confidence_threshold": 0.7,
+    "max_history_rounds": 10
+  },
+  "safety": {
+    "enable_confirmation": true,
+    "fallback_action": "block",
+    "dangerous_keys": ["delete", "backspace", "escape"],
+    "dangerous_hotkeys": [["ctrl", "w"], ["alt", "f4"], ["ctrl", "shift", "delete"]],
+    "dangerous_patterns": ["rm ", "del ", "format ", "shutdown", "reboot"]
   }
 }
