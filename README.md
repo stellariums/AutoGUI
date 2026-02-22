@@ -208,6 +208,10 @@ A: AutoGUI processes one task at a time. Wait for the current task to finish.
 - Python >= 3.10
 - An OpenAI-compatible vision API (GPT-4o, Qwen-VL, etc.)
 
+## Acknowledgments
+
+This project is based on [tech-shrimp/qwen_autogui](https://github.com/tech-shrimp/qwen_autogui), refactored as an MCP Server with added safety checks, layered configuration, and multi-client support.
+
 ## License
 
 MIT

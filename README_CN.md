@@ -208,6 +208,10 @@ A: AutoGUI 同一时间只处理一个任务，请等待当前任务完成。
 - Python >= 3.10
 - OpenAI 兼容的视觉 API（GPT-4o、Qwen-VL 等）
 
+## 致谢
+
+本项目基于 [tech-shrimp/qwen_autogui](https://github.com/tech-shrimp/qwen_autogui) 改造，重构为 MCP Server 并新增安全检查、分层配置和多客户端支持。
+
 ## 许可证
 
 MIT
